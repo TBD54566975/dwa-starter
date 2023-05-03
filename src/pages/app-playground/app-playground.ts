@@ -233,19 +233,19 @@ export class AppPlayground extends LitElement {
       finish();
     };
 
-    const handleDenied = (event) => {
+    const handleDenied = () => {
       finish();
 
       window.alert('Connect denied!');
     };
 
-    const handleBlocked = (event) => {
+    const handleBlocked = () => {
       finish();
 
       window.alert('Connect blocked!');
     };
 
-    const handleError = (event) => {
+    const handleError = () => {
       finish();
 
       window.alert('Connect failed!');
@@ -273,7 +273,7 @@ export class AppPlayground extends LitElement {
     await dwnRequestPNGPermissions(this._did ?? { });
   }
 
-  async _handleDWNWriteInputChange(event) {
+  async _handleDWNWriteInputChange() {
     this._writeResults = [ ];
   }
 
