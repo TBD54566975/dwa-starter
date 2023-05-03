@@ -1,5 +1,15 @@
 import { Web5 } from '@tbd54566975/web5';
 
+interface KeyPair {
+  id: string;
+  keyPair: object;
+}
+
+interface Did {
+  id: string;
+  keys: Array<KeyPair>;
+}
+
 export const web5 = new Web5();
 
 export async function didCreate() {
@@ -7,7 +17,7 @@ export async function didCreate() {
   return did;
 }
 
-export async function didRegister(did: object) {
+export async function didRegister(did: Did) {
   await web5.did.manager.set(did.id, {
     connected: true,
     endpoint: 'app://dwn',
@@ -19,7 +29,7 @@ export async function didRegister(did: object) {
   });
 }
 
-export async function dwnRequestPNGPermissions(did: object) {
+export async function dwnRequestPNGPermissions(did: Did) {
   const result = await web5.dwn.permissions.request(did.id, {
     author: did.id,
     message: {
@@ -35,7 +45,7 @@ export async function dwnRequestPNGPermissions(did: object) {
   return result;
 }
 
-export async function dwnWritePNGRecord(did: object, data: Uint8Array) {
+export async function dwnWritePNGRecord(did: Did, data: Uint8Array) {
   const result = await web5.dwn.records.write(did.id, {
     author: did.id,
     data,
@@ -46,7 +56,7 @@ export async function dwnWritePNGRecord(did: object, data: Uint8Array) {
   return result;
 }
 
-export async function dwnQueryPNGRecords(did: object) {
+export async function dwnQueryPNGRecords(did: Did) {
   const result = await web5.dwn.records.query(did.id, {
     author: did.id,
     message: {
@@ -58,7 +68,7 @@ export async function dwnQueryPNGRecords(did: object) {
   return result;
 }
 
-export async function dwnReadDataFromRecordWithId(did: object, recordId: string) {
+export async function dwnReadDataFromRecordWithId(did: Did, recordId: string) {
   const result = await web5.dwn.records.read(did.id, {
     author: did.id,
     message: {
@@ -68,7 +78,7 @@ export async function dwnReadDataFromRecordWithId(did: object, recordId: string)
   return result;
 }
 
-export async function dwnDeleteRecordWithId(did: object, recordId: string) {
+export async function dwnDeleteRecordWithId(did: Did, recordId: string) {
   const result = await web5.dwn.records.delete(did.id, {
     author: did.id,
     message: {
