@@ -169,7 +169,7 @@ export class AppPlayground extends LitElement {
     `;
   }
 
-  _setDID(did, options = { }) {
+  _setDID(did, options = { cache: false }) {
     if (did?.id && did?.internalId && did?.keys?.[0]?.keyPair) {
       this._did = did;
     } else {
