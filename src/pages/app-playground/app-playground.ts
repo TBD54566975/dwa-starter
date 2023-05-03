@@ -35,7 +35,7 @@ const DIDStorageKey = 'app-playground-did';
 
 @customElement('app-playground')
 export class AppPlayground extends LitElement {
-  _didTextareaRef = createRef();
+  _didTextareaRef = createRef<HTMLTextAreaElement>();
   @property({ type: Object }) _did = null;
   @property({ type: Boolean }) _hasRegisteredDID = false;
 
@@ -43,7 +43,7 @@ export class AppPlayground extends LitElement {
   @property({ type: String }) _connectPIN = '';
   @property({ type: Boolean }) _hasConnected = false;
 
-  _fileInputRef = createRef();
+  _fileInputRef = createRef<HTMLInputElement>();
   @property({ type: Boolean }) _isWriting = false;
   @property({ type: Array }) _writeResults = [ ];
 
