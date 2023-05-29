@@ -8,13 +8,12 @@ import './components/global.js';
 import './styles/theme.js';
 import './utils/dom';
 
-
 import '@vaadin/app-layout/theme/lumo/vaadin-app-layout.js';
 import '@vaadin/app-layout/theme/lumo/vaadin-drawer-toggle.js';
 import '@vaadin/tabs/theme/lumo/vaadin-tabs.js';
 
 import './pages/home';
-import './pages/examples';
+import './pages/docs';
 import './pages/settings';
 
 import { Web5 } from '@tbd54566975/web5';
@@ -42,16 +41,6 @@ export class AppContainer extends LitElement {
         flex-direction: column;
         height: 100%;
       }
-
-      /* #app_header {
-        padding: 0.9em 1.1em;
-        color: #000;
-        background-color: rgb(255, 236, 25);
-        background: rgb(37 39 42);
-        border-bottom: 1px solid #111;
-        box-shadow: rgba(0, 0, 0, 0.15) 0px 1px 3px 0px;
-        z-index: 100;
-      } */
 
       vaadin-drawer-toggle {
         display: flex;
@@ -86,10 +75,6 @@ export class AppContainer extends LitElement {
 
       vaadin-app-layout vaadin-tab a :first-child {
         margin: 0 0.5em 0 0;
-      }
-
-      vaadin-app-layout [content] {
-
       }
 
       main {
@@ -164,7 +149,10 @@ export class AppContainer extends LitElement {
     super();
 
     this.router = new AppRouter(this, {
-      onRouteChange: () => {
+      onRouteChange: (enteringRoute) => {
+        if (this.nav){
+          this.nav.selected = [...this.nav.children].indexOf(this.renderRoot.querySelector(`vaadin-tab a[href="${enteringRoute.path}"]`).parentNode)
+        }
         this.renderRoot.querySelector('#app_layout')?.__closeOverlayDrawer()
       },
       routes: [
@@ -173,8 +161,8 @@ export class AppContainer extends LitElement {
           component: '#home'
         },
         {
-          path: '/examples',
-          component: '#examples'
+          path: '/docs',
+          component: '#docs'
         },
         {
           path: '/settings',
@@ -188,6 +176,7 @@ export class AppContainer extends LitElement {
   }
 
   firstUpdated() {
+    this.nav = this.renderRoot.querySelector('#global_nav');
     DOM.skipFrame(() => this.router.goto(location.pathname));
   }
 
@@ -215,7 +204,7 @@ export class AppContainer extends LitElement {
 
         <h1 slot="navbar">DWA Starter</h1>
 
-        <vaadin-tabs slot="drawer" orientation="vertical">
+        <vaadin-tabs id="global_nav" slot="drawer" orientation="vertical">
           <vaadin-tab>
             <a tabindex="-1" href="/">
               <sl-icon name="house"></sl-icon>
@@ -223,9 +212,9 @@ export class AppContainer extends LitElement {
             </a>
           </vaadin-tab>
           <vaadin-tab>
-            <a tabindex="-1" href="/examples">
-              <sl-icon name="grid"></sl-icon>
-              <span>Examples</span>
+            <a tabindex="-1" href="/docs">
+              <sl-icon name="file-earmark-text"></sl-icon>
+              <span>Docs</span>
             </a>
           </vaadin-tab>
           <vaadin-tab>
@@ -238,7 +227,7 @@ export class AppContainer extends LitElement {
 
         <main id="pages">
           <page-home id="home" scroll></page-home>
-          <page-examples id="examples" scroll></page-examples>
+          <page-docs id="docs" scroll></page-docs>
           <page-settings id="settings" scroll></page-settings>
         </main>
 

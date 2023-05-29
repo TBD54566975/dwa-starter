@@ -8,26 +8,23 @@ class Datastore {
     this.dwn = options.web5.dwn;
     this.ready = new Promise(resolve => {
       this.getProtocol().then(async response => {
-        if (response.entries.length) {
+        if (response.protocols.length) {
           console.log('existing');
           resolve();
         }
         else {
-          console.log('new')
+          console.log('new');
           this.setProtocol().then(z => resolve());
         }
       })
     })
   }
 
-  protocolUri = 'music';
-  audioSchema = 'music://audio';
-  trackSchema = 'music://track';
-  playlistSchema = 'music://playlist';
+  protocolUri = 'https://developer.tbd.website/protocols/blog';
+  postSchema = 'https://developer.tbd.website/protocols/5lides/post';
 
   getProtocol(){
-    return this.dwn.protocols.query(this.did.id, {
-      author: this.did.id,
+    return this.dwn.protocols.query({
       message: {
         filter: {
           protocol: this.protocolUri
@@ -37,164 +34,90 @@ class Datastore {
   }
 
   setProtocol(){
-    return this.dwn.protocols.configure(this.did.id, {
-      author: this.did.id,
+    return this.dwn.protocols.configure({
       message: {
-        protocol: this.protocolUri,
         definition: {
-          labels: {
-            "audio": {
-              "schema": this.audioSchema
+          protocol: this.protocolUri,
+          types: {
+            post: {
+              schema: this.postSchema,
+              dataFormats: ['application/json']
             },
-            "track": {
-              "schema": this.trackSchema
-            },
-            "playlist": {
-              "schema": this.playlistSchema
+            image: {
+              dataFormats: ['image/gif', 'image/x-png', 'image/jpeg']
             }
           },
-          records: {
-            playlist: {},
-            track: {
-              records: {
-                audio: {}
-              }
-            }
+          structure: {
+            post: {},
+            image: {}
           }
         }
       }
     });
   }
-
-  getPlaylist(playlistId){
-    return this.dwn.records.read(this.did.id, {
-      author: this.did.id,
+  async createPost(json, format){
+    const { record } = await this.dwn.records.create({
+      data: json,
       message: {
         protocol: this.protocolUri,
-        recordId: playlistId
-      }
-    });
-  }
-
-  getPlaylists(){
-    return this.dwn.records.query(this.did.id, {
-      author: this.did.id,
-      message: {
-        filter: {
-          protocol: this.protocolUri,
-          schema: this.playlistSchema
-        }
-      }
-    });
-  }
-
-  getPlaylistMap(){
-    return [
-      {
-        name: 'Rap',
-        recordId: 'ID_1'
-      },
-      {
-        name: 'Classic Rock',
-        recordId: 'ID_2'
-      },
-      {
-        name: 'Alternative',
-        recordId: 'ID_3'
-      }
-    ]
-  }
-
-  createPlaylist(playlistJson){
-    return this.dwn.records.create(this.did.id, {
-      author: this.did.id,
-      data: playlistJson,
-      message: {
-        protocol: this.protocolUri,
-        schema: this.playlistSchema,
+        protocolPath: 'post',
+        schema: this.postSchema,
         dataFormat: 'application/json'
       }
     });
+    record.json = await record.data.json();
+    return record;
   }
 
-  modifyPlaylist(){
-
-  }
-
-  getTrack(trackId){
-    return this.dwn.records.read(this.did.id, {
-      author: this.did.id,
+  async getPost(postId){
+    const { record, status } = await this.dwn.records.read({
       message: {
-        recordId: trackId
+        recordId: postId
       }
     });
+    if (status.code !== 200) return false;
+    record.postData = await record.data.json();
+    return record;
   }
 
-  async getTracks(){
-    const response = await this.dwn.records.query(this.did.id, {
-      author: this.did.id,
+  async getPosts(){
+    const { records } = await this.dwn.records.query({
       message: {
         filter: {
           protocol: this.protocolUri,
-          schema: this.trackSchema
+          schema: this.postSchema
         }
       }
     });
-    return Promise.all(response.entries.map(async entry => {
+    return Promise.all(records.map(async entry => {
       const json = await entry.data.json()
-      entry.trackData = json;
+      entry.postData = json;
       return entry;
     }))
   }
 
-  async createTrack(trackJson){
-    const response = await this.dwn.records.create(this.did.id, {
-      author: this.did.id,
-      data: trackJson,
+  async createImage(file, format){
+    const { record } = await this.dwn.records.create({
+      data: file,
       message: {
         protocol: this.protocolUri,
-        schema: this.trackSchema,
-        dataFormat: 'application/json'
-      }
-    });
-    response.record.trackData = await response.record.data.json();
-    return response.record;
-  }
-
-  async modifyTrack(){
-
-  }
-
-  async getAudioForTrack(trackId){
-    const results = await this.dwn.records.query(this.did.id, {
-      author: this.did.id,
-      message: {
-        filter: {
-          protocol: this.protocolUri,
-          parentId: trackId
-        }
-      }
-    });
-    const record = results.entries[0];
-    if (!record) return;
-    const stream = toWebStream(await record.data.stream())
-    const blob = await (new Response(stream).blob({ type: record.dataFormat }));
-    record.audioUrl = URL.createObjectURL(blob);
-    return record;
-  }
-
-  async saveAudioForTrack(file, format, trackId){
-    return this.dwn.records.create(this.did.id, {
-      author: this.did.id,
-      data: new Uint8Array(await file.arrayBuffer()), // rip this jank out when we get streams going again
-      message: {
-        parentId: trackId,
-        contextId: trackId,
-        protocol: this.protocolUri,
-        schema: this.audioSchema,
+        protocolPath: 'image',
         dataFormat: format
       }
     });
+    record.blobUrl = URL.createObjectURL(await record.data.blob());
+    return record;
+  }
+
+  async getImage(imageId){
+    const { record } = await this.dwn.records.read({
+      message: {
+        recordId: imageId
+      }
+    });
+    if (!record) return;
+    record.blobUrl = URL.createObjectURL(await record.data.blob());
+    return record;
   }
 
 }
