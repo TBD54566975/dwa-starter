@@ -81,6 +81,14 @@ Now you will see that we load the display name and the avatar image from the fol
 
 The beauty of DWAs is that, once the Web5 SDK polyfills are active, we can read the data from the DWNs without any extra code, just by using the native browser fetch API!
 
+Even further, the urls works out of the box in any browser context, including img tags within the `src` attribute. The following code just works:
+
+```tsx
+<img src="https://dweb/${did}/read/protocols/${encodeURIComponent(protocolUri)}/avatar" />
+```
+
+Check the [`<ProfileSettings />`](./src/components/profile-settings.tsx#L147) component, to see how the avatar image is being handled (ignoring the conditional noise to handle the image file upload input).
+
 ## React + Vite-PWA
 
 This repo was created with vite-pwa, check the default instructions below.
