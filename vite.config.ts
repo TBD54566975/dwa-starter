@@ -8,6 +8,11 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   define: {
     global: "globalThis",
+    process: {
+      env: {},
+      browser: true,
+      version: '',
+    }
   },
   plugins: [
     nodePolyfills(),
