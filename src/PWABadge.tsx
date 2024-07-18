@@ -24,22 +24,24 @@ function PWABadge() {
   });
 
   function close() {
+    console.info({ offlineReady });
     setOfflineReady(false);
     setNeedRefresh(false);
   }
 
   return (
     <div className="PWABadge" role="alert" aria-labelledby="toast-message">
-      {(offlineReady || needRefresh) && (
+      {needRefresh && (
         <div className="fixed right-0 bottom-0 m-4 p-3 border-solid border-2 rounded-lg bg-background z-50 shadow-md">
           <div>
-            {offlineReady ? (
+            {/* TODO: introduce offline notification when offline work is ready
+             {offlineReady ? (
               <span>App ready to work offline</span>
-            ) : (
-              <span>
-                New content available, click on reload button to update.
-              </span>
-            )}
+            ) : ( */}
+            <span>
+              New content available, click on reload button to update.
+            </span>
+            {/* )} */}
           </div>
           <div className="mt-4 space-x-2 text-right">
             {needRefresh && (

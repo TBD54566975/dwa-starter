@@ -75,7 +75,12 @@ export class TodoDwnRepository {
   }
 
   async deleteTask(recordId: string) {
-    return this.dwn.records.delete({ message: { recordId } });
+    const record = await this.findTaskRecord(recordId);
+    if (!record) {
+      throw new Error("Task not found");
+    }
+    await record.delete();
+    return record.send();
   }
 
   async findTaskRecord(recordId: string) {

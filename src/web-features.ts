@@ -1,10 +1,10 @@
+// @ts-nocheck
+
 /*
   This file is run in dual environments to make installation of the Service Worker code easier.
   Be mindful that code placed in any open excution space may be evaluated multiple times in different contexts,
   so take care to gate additions to only activate code in the right env, such as a Service Worker scope or page window.
 */
-
-// @ts-nocheck
 
 import { UniversalResolver, DidDht, DidWeb } from "@web5/dids";
 
@@ -15,9 +15,20 @@ const didUrlRegex = /^https?:\/\/dweb\/([^/]+)\/?(.*)?$/;
 const httpToHttpsRegex = /^http:/;
 const trailingSlashRegex = /\/$/;
 
+// This is in place to prevent our `bundler-bonanza` repo from failing for Node CJS builds
+// Not sure if this is working as expected in all environments, crated an issue
+// TODO: https://github.com/TBD54566975/web5-js/issues/767
+function importMetaIfSupported() {
+  try {
+    return new Function("return import.meta")();
+  } catch (_error) {
+    return undefined;
+  }
+}
+
 async function getDwnEndpoints(did) {
   const { didDocument } = await DidResolver.resolve(did);
-  let endpoints = didDocument?.service?.find(
+  const endpoints = didDocument?.service?.find(
     (service) => service.type === "DecentralizedWebNode"
   )?.serviceEndpoint;
   return (Array.isArray(endpoints) ? endpoints : [endpoints]).filter((url) =>
@@ -138,9 +149,7 @@ async function installWorker(options: any = {}): Promise<void> {
           options.path ||
           (globalThis.document
             ? document?.currentScript?.src
-            : // TODO: review >>> import.meta?.url);
-              undefined);
-        console.info({ installUrl });
+            : importMetaIfSupported()?.url);
         if (installUrl)
           navigator.serviceWorker
             .register(installUrl, { type: "module" })
@@ -320,7 +329,7 @@ function injectElements() {
   `;
   document.head.append(style);
 
-  let overlay = document.createElement("div");
+  const overlay = document.createElement("div");
   overlay.classList.add("drl-loading-overlay");
   overlay.innerHTML = `
     <div class="drl-loading-spinner">
@@ -344,13 +353,13 @@ let linkFeaturesActive = false;
 function addLinkFeatures() {
   if (!linkFeaturesActive) {
     document.addEventListener("click", async (event: any) => {
-      let anchor = event.target.closest("a");
+      const anchor = event.target.closest("a");
       if (anchor) {
-        let href = anchor.href;
+        const href = anchor.href;
         const match = href.match(didUrlRegex);
         if (match) {
-          let did = match[1];
-          let path = match[2];
+          const did = match[1];
+          const path = match[2];
           const openAsTab = anchor.target === "_blank";
           event.preventDefault();
           try {
@@ -369,7 +378,7 @@ function addLinkFeatures() {
             }
             const endpoints = await getDwnEndpoints(did);
             if (!endpoints.length) throw null;
-            let url = `${endpoints[0].replace(
+            const url = `${endpoints[0].replace(
               trailingSlashRegex,
               ""
             )}/${did}/${path}`;

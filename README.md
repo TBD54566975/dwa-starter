@@ -66,7 +66,7 @@ It uses Web5 through the `useWeb5` hook and, to simplify the component code, we 
 
 In this page we are using direct access to the DWN protocols in the component itself, just to have more inline code to read.
 
-The goal here is to understand how to persist data using protocols (read more in our [docs here](https://developer.tbd.website/docs/web5/learn/protocolss)) and read them using DRLs in the browser natively.
+The goal here is to understand how to persist data using protocols (read more in our [docs here](https://developer.tbd.website/docs/web5/learn/protocols)) and read them using DRLs in the browser natively.
 
 First, we need to install the protocols schemas, the code for that can be found in the [`protocols.ts`](./src/web5/protocols.ts) file and is executed only once, when connected, if the protocol is not installed yet.
 
